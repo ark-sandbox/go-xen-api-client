@@ -273,6 +273,14 @@ var _ = strconv.Atoi
 var _ = time.UTC
 `
 
+const closeClientTemplate string = `
+//Closes rpc client.
+func (c *Client) Close() {
+	c.rpc.Close()
+}
+
+`
+
 const enumTypeTemplate string = `
 type {{ .Name|exported }} string
 
@@ -547,10 +555,10 @@ func (generator *apiGenerator) prepTemplates() (err error) {
 	generator.templates = template.New("")
 
 	generator.templates.Funcs(template.FuncMap{
-		"godoc":    formatGoDoc,
-		"singleLine":    formatSingleLine,
-		"exported": exportedGoIdentifier,
-		"internal": internalGoIdentifier,
+		"godoc":      formatGoDoc,
+		"singleLine": formatSingleLine,
+		"exported":   exportedGoIdentifier,
+		"internal":   internalGoIdentifier,
 		"convertToGo": func(xenType string) (string, error) {
 			converter, err := generator.getOrCreateConverterFunc(xenType, "ToGo")
 			if err != nil {
@@ -589,6 +597,7 @@ func (generator *apiGenerator) prepTemplates() (err error) {
 		"convertMapTypeToXenFunc":    convertMapTypeToXenFuncTemplate,
 		"convertEnumTypeToGoFunc":    convertEnumTypeToGoFuncTemplate,
 		"convertEnumTypeToXenFunc":   convertEnumTypeToXenFuncTemplate,
+		"closeClient":                closeClientTemplate,
 	}
 
 	for name, value := range templateLedger {
@@ -885,6 +894,11 @@ func (generator *apiGenerator) generateClient() (err error) {
 	err = generator.templates.ExecuteTemplate(fileHandle, "ClientStruct", map[string]interface{}{
 		"Classes": generator.classes,
 	})
+
+	err = generator.templates.ExecuteTemplate(fileHandle, "closeClient", nil)
+	if err != nil {
+		return
+	}
 
 	return
 }

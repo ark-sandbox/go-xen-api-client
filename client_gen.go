@@ -147,3 +147,9 @@ func prepClient(rpc *xmlrpc.Client) *Client {
 	client.VUSB = VUSBClass{&client}
 	return &client
 }
+
+//Closes rpc client.
+func (c *Client) Close() {
+	c.rpc.Close()
+}
+

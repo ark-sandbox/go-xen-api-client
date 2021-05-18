@@ -5,7 +5,9 @@ package xenapi
 import (
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/amfranz/go-xmlrpc-client"
 )
@@ -58,6 +60,8 @@ func NewClient(url string, transport *http.Transport) (*Client, error) {
 	if transport == nil {
 		transport = &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			DialContext: (&net.Dialer{
+				Timeout: 10 * time.Second}).DialContext,
 		}
 	}
 
